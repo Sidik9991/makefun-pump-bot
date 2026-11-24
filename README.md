@@ -26,7 +26,7 @@ Deterministic: no clock, no randomness, no network at replay time.
 
 - Pass 1: net **+0.154 SOL**, 277 fills, 45 coins, 93 trips, max drawdown 9.3%.
 - Pass 2 (sweep-tuned, 4 fail keys): mean net **+1.059 SOL** (worst key +1.025), 338 fills, 59 coins, 106 trips, 15 wins, max drawdown 8.3%; at 2× fees still **+0.399 SOL**.
-- `grade-local` (process driver, the server's own grader on the dev window): net **+0.563 SOL** (return 5.6%, 90% interval −1.47..+3.62 SOL), 341 fills, 60 coins, 106 round trips, win rate 12.3%, max drawdown 9.7%; guardrails met; L1 regrade reproduced byte for byte. Top 3 coins made 94% of the gains — the dev score leans on a few coins, and the final window is a different 24 h, so this is not a forecast.
+- `grade-local` (process driver, the server's own grader on the dev window): net **+0.563 SOL** (return 5.6%, 90% interval −1.47..+3.62 SOL), 341 fills, 60 coins, 106 round trips, win rate 12.3%, max drawdown 9.7%; guardrails met; L1 regrade reproduced byte for byte. Speed fix (lean wire loop + hot-path opts, commit below): action_log_sha256 unchanged a381a7d2…, net PnL identical 563474940 lamports; grade-local wall ~34.5 s (same as the ~34 s baseline — local wall is harness-dominated; the fix cuts per-batch bot CPU the server amplifies). Top 3 coins made 94% of the gains — the dev score leans on a few coins, and the final window is a different 24 h, so this is not a forecast.
 - Kit pilot momentum baseline on the same window: −9.384 SOL (for reference only).
 
 ## Run it
@@ -39,7 +39,8 @@ node tools/sweep.ts <kit dir> '{}' '{"trail":[0.15,0.25]}'  # parameter sweep
 
 ## Layout
 
-- `main.ts` — entrypoint, hands the strategy to the SDK shim.
+- `main.ts` — entrypoint, hands the strategy to the lean wire loop.
+- `wire.ts` — lean wire loop (numbers/strings, no BigInt conversions), byte-identical replies to the kit shim.
 - `strategy.ts` — the bot: tape, entry signal, scale-in, exits, drawdown guard, probes.
 - `vendor/agentfun-bot.ts` — the kit's SDK shim, vendored byte for byte.
 - `tools/` — the kit's offline sim, backtest and sweep tools (local validation only).

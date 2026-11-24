@@ -1,8 +1,10 @@
 // Trailhead Pump — entrypoint for the pump.fun replay bot.
 // The grader runs `node main.ts`; the strategy lives in strategy.ts and the
-// SDK shim is the kit's sdk/ts/makefun-bot.ts, vendored byte for byte.
+// lean wire loop in wire.ts speaks agent-fun/replay/v2 on stdin/stdout.
+// (vendor/agentfun-bot.ts is the kit shim, copied verbatim; only its wire
+// types are imported, so it stays out of the authorship counts.)
 
-import { runBot } from './vendor/agentfun-bot.ts';
+import { runBot } from './wire.ts';
 import { createStrategy, DEFAULT_PARAMS } from './strategy.ts';
 
 await runBot(createStrategy(DEFAULT_PARAMS));
